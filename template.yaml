@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  ProcessCSVFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Runtime: python3.11
+      CodeUri: lambdas/process_csv/
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: expenses
+      Events:
+        Upload:
+          Type: S3
+          Properties:
+            Bucket: !Ref UploadBucket
+            Events: s3:ObjectCreated:*
+
+  GetSummaryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.lambda_handler
+      Runtime: python3.11
+      CodeUri: lambdas/get_summary/
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: expenses
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /summary
+            Method: get

@@ -1,22 +1,4 @@
-# Capital Insight - Serverless App
-
-A simple serverless application to analyze personal expenses using AWS Lambda, S3, API Gateway, and DynamoDB.
-
-## Features
-
-- Upload CSV files to Amazon S3.
-- Automatic processing triggered by AWS Lambda.
-- Analyze expenses by category.
-- Get basic spending recommendations.
-
-## Technologies
-
-- Python 3.11  
-- AWS Lambda (with AWS SAM)  
-- Amazon S3 (LocalStack)
-- DynamoDB (LocalStack)
-
-## Steps to test locally
+# steps to test locally
 
 1. Run LocalStack to emulate AWS services locally:
 
@@ -187,6 +169,7 @@ Example output:
     "ScannedCount": 3,
     "ConsumedCapacity": null
 }
+
 
 9. Invoke the SAM function locally to summary the data inside DynamoDB:
 
