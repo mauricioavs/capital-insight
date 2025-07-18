@@ -1,5 +1,8 @@
-date,category,amount
-2024-07-01,food,20.5
-2024-07-02,entertainment,35.0
-2024-07-02,transport,15.0
-2024-07-03,food,12.3
+user_id,date,amount,category,description
+user_1,2025-07-01,45.00,Food,"Lunch at café"
+user_1,2025-07-02,120.50,Transport,"Monthly metro pass"
+user_1,2025-07-03,35.20,Utilities,"Electricity bill"
+user_2,2025-07-04,60.00,Entertainment,"Cinema and snacks"
+user_2,2025-07-05,20.75,Food,"Groceries"
+user_3,2025-07-06,15.00,Transport,"Taxi ride"
+user_3,2025-07-07,200.00,Rent,"Room rent for July"

@@ -1,23 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Resources:
-  UploadBucket:
-    Type: AWS::S3::Bucket
-  ExpensesTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: expenses
-      AttributeDefinitions:
-      - AttributeName: user_id
-        AttributeType: S
-      - AttributeName: timestamp
-        AttributeType: S
-      KeySchema:
-      - AttributeName: user_id
-        KeyType: HASH
-      - AttributeName: timestamp
-        KeyType: RANGE
-      BillingMode: PAY_PER_REQUEST
   ProcessCSVFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -28,12 +11,15 @@ Resources:
         Variables:
           DYNAMODB_TABLE: expenses
       Events:
-        Upload:
-          Type: S3
+        ApiEvent:
+          Type: Api
           Properties:
-            Bucket:
-              Ref: UploadBucket
-            Events: s3:ObjectCreated:*
+            Path: /upload
+            Method: post
+            Cors:
+              AllowMethods: '''POST,OPTIONS'''
+              AllowHeaders: '''Content-Type'''
+              AllowOrigin: '''*'''
     Metadata:
       SamResourceId: ProcessCSVFunction
   GetSummaryFunction:
@@ -46,10 +32,23 @@ Resources:
         Variables:
           DYNAMODB_TABLE: expenses
       Events:
-        ApiEvent:
+        GetAllSummary:
           Type: Api
           Properties:
             Path: /summary
             Method: get
+            Cors:
+              AllowMethods: '''GET,OPTIONS'''
+              AllowHeaders: '''Content-Type'''
+              AllowOrigin: '''*'''
+        GetSummaryByUserId:
+          Type: Api
+          Properties:
+            Path: /summary/{user_id}
+            Method: get
+            Cors:
+              AllowMethods: '''GET,OPTIONS'''
+              AllowHeaders: '''Content-Type'''
+              AllowOrigin: '''*'''
     Metadata:
       SamResourceId: GetSummaryFunction

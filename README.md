@@ -1,45 +1,42 @@
 # Capital Insight - Serverless App
 
-A simple serverless application to analyze personal expenses using AWS Lambda, S3, API Gateway, and DynamoDB.
+A simple serverless application to analyze personal expenses, featuring a backend built with AWS Lambda and DynamoDB, and a frontend developed using React and Vite.
 
 ## Features
 
-- Upload CSV files to Amazon S3.
+- Simulate upload CSV files to Amazon S3.
 - Automatic processing triggered by AWS Lambda.
-- Analyze expenses by category.
-- Get basic spending recommendations.
+- Store expenses inside DynamoDB.
+- Retrieve information.
 
 ## Technologies
 
-- Python 3.11  
+- Python 3.11
 - AWS Lambda (with AWS SAM)  
-- Amazon S3 (LocalStack)
 - DynamoDB (LocalStack)
 
 ## Steps to test locally
 
 1. Run LocalStack to emulate AWS services locally:
 
-docker run -d --name localstack -p 4566:4566 -p 4571:4571 localstack/localstack
+`docker run -d --name localstack -p 4566:4566 -p 4571:4571 localstack/localstack`
 
-2. Create an S3 bucket in LocalStack:
+Or initialize current one:
 
-aws --endpoint-url=http://localhost:4566 s3 mb s3://my-local-bucket
+`docker start localstack`
 
-Example output:
+2. Create a DynamoDB table in LocalStack:
 
-make_bucket: my-local-bucket
-
-3. Create a DynamoDB table in LocalStack:
-
+```
 aws --endpoint-url=http://localhost:4566 dynamodb create-table \
   --table-name expenses \
-  --attribute-definitions AttributeName=user_id,AttributeType=S AttributeName=timestamp,AttributeType=S \
-  --key-schema AttributeName=user_id,KeyType=HASH AttributeName=timestamp,KeyType=RANGE \
+  --attribute-definitions AttributeName=user_id,AttributeType=S AttributeName=date,AttributeType=S \
+  --key-schema AttributeName=user_id,KeyType=HASH AttributeName=date,KeyType=RANGE \
   --billing-mode PAY_PER_REQUEST
+  ```
 
 Example output:
-
+```
 {
     "TableDescription": {
         "AttributeDefinitions": [
@@ -83,59 +80,55 @@ Example output:
         "DeletionProtectionEnabled": false
     }
 }
+```
 
-4. Build your SAM application after any code changes:
+3. Build your SAM application after any code changes:
 
+```
 sam build
+```
 
-5. Upload the CSV file to the S3 bucket:
+4. Run the local API gateway to expose your Lambdas as REST endpoints:
 
-aws --endpoint-url=http://localhost:4566 s3 cp sample_data/expenses.csv s3://my-local-bucket/
+```
+sam local start-api
+```
 
-Example output:
+5. Install node version 20:
 
-upload: sample_data/expenses.csv to s3://my-local-bucket/expenses.csv
+```
+nvm install 20
+nvm use 20
+```
 
-6. Create the S3 event JSON file (s3_event.json) simulating the file upload event:
+6. Install dependencies in package.json:
+```
+cd frontend
+npm install
+```
 
-{
-  "Records": [
-    {
-      "s3": {
-        "bucket": {
-          "name": "my-local-bucket"
-        },
-        "object": {
-          "key": "expenses.csv"
-        }
-      }
-    }
-  ]
-}
+7. Run node server
+
+```
+npm run dev
+```
 
 
-7. Invoke the SAM function locally to process the CSV and insert data into DynamoDB:
+# DynamoDB useful commands
 
-sam local invoke ProcessCSVFunction -e s3_event.json
+1. Delete DynamoDB table:
 
-Example output:
-
-No current session found, using default AWS::AccountId                                                                                                                                  
-Invoking handler.lambda_handler (python3.11)                                                                                                                                            
-Local image is up-to-date                                                                                                                                                               
-Using local image: public.ecr.aws/lambda/python:3.11-rapid-x86_64.                                                                                                                      
-                                                                                                                                                                                        
-Mounting /home/mauricio/Desktop/capital-insight/.aws-sam/build/ProcessCSVFunction as /var/task:ro,delegated, inside runtime container                                                   
-START RequestId: 96c5f266-b03e-4a2f-8278-7e7e657e15b9 Version: $LATEST
-END RequestId: ccfac705-edd1-4f94-8d73-65e1ad2942e5
-REPORT RequestId: ccfac705-edd1-4f94-8d73-65e1ad2942e5	Init Duration: 0.04 ms	Duration: 437.29 ms	Billed Duration: 438 ms	Memory Size: 128 MB	Max Memory Used: 128 MB	
-{"statusCode": 200, "message": "Archivo procesado"}
-
+```
+aws --endpoint-url=http://localhost:4566 dynamodb delete-table --table-name expenses
+```
 
 8. Verify that the data was inserted into the DynamoDB table:
 
+```
 aws dynamodb scan --table-name expenses   --endpoint-url=http://localhost:4566
+```
 
+```
 Example output:
 
 {
@@ -187,28 +180,40 @@ Example output:
     "ScannedCount": 3,
     "ConsumedCapacity": null
 }
+```
 
-9. Invoke the SAM function locally to summary the data inside DynamoDB:
 
+# SAM useful commands
+
+1. Invoke the SAM function locally to summary the data inside DynamoDB:
+
+```
 sam local invoke GetSummaryFunction
+```
 
 Example output:
 
-No current session found, using default AWS::AccountId                                                                                                                                  
-Invoking handler.lambda_handler (python3.11)                                                                                                                                            
-Local image is up-to-date                                                                                                                                                               
-Using local image: public.ecr.aws/lambda/python:3.11-rapid-x86_64.                                                                                                                      
-                                                                                                                                                                                        
-Mounting /home/mauricio/Desktop/capital-insight/.aws-sam/build/GetSummaryFunction as /var/task:ro,delegated, inside runtime container                                                   
-START RequestId: 63478984-0953-4895-8093-1bfd5c0ef61d Version: $LATEST
-END RequestId: 50bacbe3-da18-4ed2-aca1-8348208f1b62
-REPORT RequestId: 50bacbe3-da18-4ed2-aca1-8348208f1b62	Init Duration: 0.03 ms	Duration: 284.24 ms	Billed Duration: 285 ms	Memory Size: 128 MB	Max Memory Used: 128 MB	
-{"statusCode": 200, "headers": {"Content-Type": "application/json"}, "body": "{\"summary\": {\"food\": 32.8, \"transport\": 15.0, \"entertainment\": 0.0}, \"recommendations\": []}"}
+```
+No current session found, using default AWS::AccountId                                                                                                                                        
+Invoking handler.lambda_handler (python3.11)                                                                                                                                                  
+Local image is up-to-date                                                                                                                                                                     
+Using local image: public.ecr.aws/lambda/python:3.11-rapid-x86_64.                                                                                                                            
+                                                                                                                                                                                              
+Mounting /home/mauricio/Desktop/capital-insight/.aws-sam/build/GetSummaryFunction as /var/task:ro,delegated, inside runtime container                                                         
+START RequestId: 0d4549a3-8d20-4a0f-9f4e-78e9b8dfa720 Version: $LATEST
+END RequestId: e1708faa-71eb-4150-b817-0b1d052b8ffd
+REPORT RequestId: e1708faa-71eb-4150-b817-0b1d052b8ffd	Init Duration: 0.03 ms	Duration: 194.63 ms	Billed Duration: 195 ms	Memory Size: 128 MB	Max Memory Used: 128 MB	
+{"statusCode": 200, "headers": {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST,OPTIONS", "Access-Control-Allow-Headers": "Content-Type"}, "body": "[{\"user_id\": \"user_2\", \"total_expenses\": 80.75, \"num_records\": 2}, {\"user_id\": \"user_3\", \"total_expenses\": 215.0, \"num_records\": 2}, {\"user_id\": \"user_1\", \"total_expenses\": 200.7, \"num_records\": 3}]"}
+```
 
-10. (Optional) Run the local API gateway to expose your Lambdas as REST endpoints:
+2. (Optional) Run the local API gateway to expose your Lambdas as REST endpoints:
 
+```
 sam local start-api
+```
 
-11. Query the summary endpoint from your local API:
+3. Query the summary endpoint from your local API:
 
+```
 curl http://127.0.0.1:3000/summary
+```
