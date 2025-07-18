@@ -44,7 +44,7 @@ export function UploadForm() {
       onSubmit={handleSubmit}
       className="p-4 border rounded-xl shadow bg-white max-w-md mx-auto"
     >
-      <h2 className="text-xl font-semibold mb-4">Upload CSV</h2>
+      <h2 className="text-xl font-semibold mb-4 text-center">Upload CSV</h2>
 
       <input
         id="csvFile"

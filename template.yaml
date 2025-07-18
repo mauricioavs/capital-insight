@@ -36,16 +36,8 @@ Resources:
           Properties:
             Path: /summary
             Method: get
-            Cors:
-              AllowMethods: "'GET,OPTIONS'"
-              AllowHeaders: "'Content-Type'"
-              AllowOrigin: "'*'"
         GetSummaryByUserId:
           Type: Api
           Properties:
             Path: /summary/{user_id}
             Method: get
-            Cors:
-              AllowMethods: "'GET,OPTIONS'"
-              AllowHeaders: "'Content-Type'"
-              AllowOrigin: "'*'"

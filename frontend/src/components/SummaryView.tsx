@@ -18,7 +18,7 @@ export const SummaryView: React.FC<Props> = ({ userId }) => {
   }, [userId]);
 
   return (
-    <div>
+    <div className="summary-view">
       <h2 className="text-xl font-bold mb-2">Resumen de {userId}</h2>
       <ul>
         {(Array.isArray(summary) ? summary : []).map((item, idx) => (
